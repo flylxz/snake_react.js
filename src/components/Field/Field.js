@@ -35,13 +35,6 @@ class Field extends React.Component {
   //   );
   // };
 
-  food = () => {
-    // const foodPosX = Math.random(window.innerWidth - Field._cell) * 1000;
-    // const foodPosY = Math.random(window.innerHeight - Field._cell) * 1000;
-    // console.log(Math.round(foodPosX), Math.round(foodPosY));
-    console.log(document.querySelector('#root > div'));
-  };
-
   selfCollision = (position, snakePosition) => {
     let keysSnake = Object.keys(snakePosition);
     // for (let i = 0; i < Field.countSnake - 1; i++) {
