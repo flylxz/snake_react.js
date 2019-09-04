@@ -1,0 +1,14 @@
+.box {
+  background-color: green;
+  position: absolute;
+  border: 2px solid #000;
+  margin: 2px;
+}
+
+.box:first-child {
+  background-color: blue;
+}
+
+.box:last-child {
+  background-color: red;
+}
