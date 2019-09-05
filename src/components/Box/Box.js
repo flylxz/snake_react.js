@@ -8,7 +8,6 @@ class Box extends React.Component {
     let bottom = setPositionY + 'px';
     let left = setPositionX + 'px';
     let boxSize = this.props.boxSize - 4;
-    // console.log(this.props);
 
     return (
       <div

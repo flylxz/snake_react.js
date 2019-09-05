@@ -1,14 +1,16 @@
 import React from 'react';
 import './Field.css';
 import Box from '../Box/Box';
+import Restart from '../Restart/Restart';
 
 class Field extends React.Component {
   static _cell = 15;
-  static countSnake = 50;
+  static countSnake = 2;
   interval = 0;
   state = {
-    positionStack: Field.startPosition(Field._cell, Field.countSnake),
-    vector: 'ArrowUp'
+    positionStack: {},
+    vector: '',
+    stateRestart: false
   };
 
   static startPosition = (cellSize, count) => {
@@ -24,20 +26,38 @@ class Field extends React.Component {
   };
 
   componentDidMount = () => {
+    this.initSnake();
     window.addEventListener('keydown', this.handleInput, true);
-    this.interval = setInterval(this.move, 250);
-    this.food();
+    this.randomizer(window.innerWidth, window.innerHeight);
   };
 
-  // preventReverse = (prevPosition, currPosition) => {
-  //   return (
-  //     prevPosition.x !== currPosition.x || prevPosition.y !== currPosition.y
-  //   );
-  // };
+  setStateRestart = stateRestart => {
+    this.setState({ stateRestart: stateRestart });
+    this.initSnake();
+  };
+  getRestart = () => {
+    if (this.state.stateRestart)
+      return <Restart setStateRestart={this.setStateRestart} />;
+    return null;
+  };
+
+  initSnake = () => {
+    this.setState({
+      positionStack: Field.startPosition(Field._cell, Field.countSnake),
+      vector: 'ArrowUp'
+    });
+    this.interval = setInterval(this.move, 250);
+  };
+
+  randomizer = (x, y) => {
+    const randomX = Math.floor(Math.random() * (x - 55)) + 35;
+    const randomY = Math.floor(Math.random() * (y - 55)) + 35;
+    // return { x: randomX, y: randomY };
+    console.log(randomX, randomY);
+  };
 
   selfCollision = (position, snakePosition) => {
     let keysSnake = Object.keys(snakePosition);
-    // for (let i = 0; i < Field.countSnake - 1; i++) {
     keysSnake.forEach(key => {
       if (
         position.x === snakePosition[key].x &&
@@ -48,10 +68,10 @@ class Field extends React.Component {
   };
 
   borderCollision = position => {
-    const topBorder = window.innerHeight - 20 - Field._cell * 2;
-    const bottomBorder = 20;
-    const leftBorder = 20 + Field._cell;
-    const rightBorder = window.innerWidth - 20 - Field._cell * 2;
+    const topBorder = window.innerHeight - 10 - Field._cell * 2;
+    const bottomBorder = 10;
+    const leftBorder = 10 + Field._cell;
+    const rightBorder = window.innerWidth - 10 - Field._cell * 2;
     if (
       position.x <= leftBorder ||
       position.x >= rightBorder ||
@@ -62,14 +82,13 @@ class Field extends React.Component {
   };
 
   gameOver = () => {
-    console.log('Game Over');
     clearInterval(this.interval);
+    this.setState({ stateRestart: true });
   };
 
   changePosition = position => {
     const positionStack = { ...this.state.positionStack };
 
-    // if (!this.preventReverse(position, positionStack[1])) return;
     if (this.selfCollision(position, positionStack));
     if (!this.borderCollision(position))
       for (let i = Field.countSnake - 1; i >= 1; i--) {
@@ -117,7 +136,12 @@ class Field extends React.Component {
   };
 
   render() {
-    return <div className='wrapper'>{this.renderBoxes()}</div>;
+    return (
+      <div className='wrapper'>
+        <div>{this.renderBoxes()}</div>
+        {this.getRestart()}
+      </div>
+    );
   }
 }
 export default Field;
