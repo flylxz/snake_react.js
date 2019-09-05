@@ -1,0 +1,6 @@
+.food {
+  background-color: #ff0;
+  position: absolute;
+  border: 2px solid #000;
+  margin: 2px;
+}
