@@ -1,13 +1,21 @@
 html,
 body,
-#root {
+#root > div {
+  /* display: flex;
+  justify-content: center;
+  align-items: center; */
+  height: 100%;
+  width: 100%;
+  background-color: rgb(255, 0, 0);
+  overflow: hidden;
+}
+
+#root > div {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  width: 100vw;
-  background-color: rgb(255, 0, 0);
-  overflow: hidden;
+  height: 100%;
+  width: 100%;
 }
 
 .wrapper {
@@ -15,8 +23,9 @@ body,
   justify-content: center;
   align-items: center;
   border: 1px solid #000;
-  height: 95%;
-  width: 100%;
-  margin: 20px;
+  margin-top: 20px;
+  margin-left: 20px;
+  margin-bottom: auto;
+  margin-right: auto;
   background-color: rgb(115, 255, 0);
 }

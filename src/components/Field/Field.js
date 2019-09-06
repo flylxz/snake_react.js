@@ -7,7 +7,17 @@ import Restart from '../Restart/Restart';
 class Field extends React.Component {
   static _cell = 15;
   static countSnake = 2;
+  static height = window.innerHeight;
+  static width = window.innerWidth;
+  static calcFieldHeight =
+    Math.floor((Field.height - 22) / Field._cell) * Field._cell - Field._cell;
+  static calcFieldWidth =
+    Math.floor((Field.width - 22) / Field._cell) * Field._cell - Field._cell;
+  static calcBottomMargin = Field.height - Field.calcFieldHeight - 21;
+  static calcRightMargin = Field.height - Field.calcFieldHeight - 21;
+
   interval = 0;
+
   state = {
     positionStack: {},
     vector: '',
@@ -16,10 +26,23 @@ class Field extends React.Component {
   };
 
   static randomizer = () => {
-    const randomX = Math.floor(Math.random() * (window.innerWidth - 55)) + 20;
-    const randomY = Math.floor(Math.random() * (window.innerHeight - 55)) + 20;
+    const randomX =
+      Math.floor(
+        (Math.floor(
+          Math.random() * (Field.width - 23 + Field.calcRightMargin)
+        ) +
+          23) /
+          Field._cell
+      ) * Field._cell;
+    const randomY =
+      Math.floor(
+        (Math.floor(
+          Math.random() * (Field.height - 23 + Field.calcBottomMargin)
+        ) +
+          23) /
+          Field._cell
+      ) * Field._cell;
     return { x: randomX, y: randomY };
-    // console.log(randomX, randomY);
   };
 
   static startPosition = (cellSize, count) => {
@@ -37,6 +60,7 @@ class Field extends React.Component {
   componentDidMount = () => {
     this.initSnake();
     window.addEventListener('keydown', this.handleInput, true);
+    this.calcFieldArr();
   };
 
   setStateRestart = stateRestart => {
@@ -47,6 +71,19 @@ class Field extends React.Component {
     if (this.state.stateRestart)
       return <Restart setStateRestart={this.setStateRestart} />;
     return null;
+  };
+
+  calcFieldArr = () => {
+    const arrFiealdCellCount =
+      (Field.calcFieldHeight / Field._cell) *
+      (Field.calcFieldWidth / Field._cell);
+    const arrFiealdCell = [];
+    for (let i = 0; i < arrFiealdCellCount; i++) {
+      arrFiealdCell[i] = null;
+    }
+    // console.log(arrFiealdCell);
+    // console.log(Field.calcFieldHeight / Field._cell);
+    // console.log(Field.calcFieldWidth / Field._cell);
   };
 
   initSnake = () => {
@@ -75,10 +112,8 @@ class Field extends React.Component {
   foodPos = () => {
     const foodStack = {};
     for (let i = 0; i < 20; i++) {
-      setInterval(() => {
-        foodStack[i] = Field.randomizer();
-        this.setState({ foodStack: foodStack });
-      }, 1000);
+      foodStack[i] = Field.randomizer();
+      this.setState({ foodStack: foodStack });
     }
   };
 
@@ -94,10 +129,10 @@ class Field extends React.Component {
   };
 
   borderCollision = position => {
-    const topBorder = window.innerHeight - 10 - Field._cell * 2;
+    const topBorder = Field.height - 10 - Field._cell * 2;
     const bottomBorder = 10;
     const leftBorder = 10 + Field._cell;
-    const rightBorder = window.innerWidth - 10 - Field._cell * 2;
+    const rightBorder = Field.width - 10 - Field._cell;
     if (
       position.x <= leftBorder ||
       position.x >= rightBorder ||
@@ -142,10 +177,10 @@ class Field extends React.Component {
     const head = this.state.positionStack[0];
 
     if (this.state.vector === 'ArrowUp') {
-      this.changePosition({ x: head.x, y: head.y + Field._cell });
+      this.changePosition({ x: head.x, y: head.y - Field._cell });
     }
     if (this.state.vector === 'ArrowDown') {
-      this.changePosition({ x: head.x, y: head.y - Field._cell });
+      this.changePosition({ x: head.x, y: head.y + Field._cell });
     }
     if (this.state.vector === 'ArrowLeft') {
       this.changePosition({ x: head.x - Field._cell, y: head.y });
@@ -153,6 +188,20 @@ class Field extends React.Component {
     if (this.state.vector === 'ArrowRight') {
       this.changePosition({ x: head.x + Field._cell, y: head.y });
     }
+  };
+
+  renderField = () => {
+    return (
+      <div
+        className='wrapper'
+        style={{
+          marginBottom: Field.calcBottomMargin,
+          marginRight: Field.calcRightMargin,
+          width: Field.calcFieldWidth,
+          height: Field.calcFieldHeight
+        }}
+      ></div>
+    );
   };
 
   renderBoxes = () => {
@@ -171,9 +220,10 @@ class Field extends React.Component {
 
   render() {
     return (
-      <div className='wrapper'>
-        <div> {this.renderBoxes()}</div>
-        {this.renderFood()}
+      <div>
+        {this.renderField()}
+        <div>{this.renderFood()}</div>
+        <div>{this.renderBoxes()}</div>
         {this.getRestart()}
       </div>
     );
