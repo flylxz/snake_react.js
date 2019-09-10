@@ -1,13 +1,12 @@
 html,
 body,
-#root > div {
-  /* display: flex;
-  justify-content: center;
-  align-items: center; */
+#root {
   height: 100%;
   width: 100%;
   background-color: rgb(255, 0, 0);
   overflow: hidden;
+  margin: 0px;
+  padding: 0px;
 }
 
 #root > div {
@@ -19,13 +18,13 @@ body,
 }
 
 .wrapper {
-  display: flex;
+  position: absolute;
+   display: flex;
   justify-content: center;
   align-items: center;
   border: 1px solid #000;
-  margin-top: 20px;
-  margin-left: 20px;
-  margin-bottom: auto;
-  margin-right: auto;
+  /* margin-top: 20px;
+  margin-left: 20px; */
+  padding: 0px;
   background-color: rgb(115, 255, 0);
 }

@@ -10,37 +10,31 @@ class Field extends React.Component {
   static height = window.innerHeight;
   static width = window.innerWidth;
   static calcFieldHeight =
-    Math.floor((Field.height - 22) / Field._cell) * Field._cell - Field._cell;
+    Math.floor((Field.height - Field._cell * 2) / Field._cell) * Field._cell -
+    Field._cell;
   static calcFieldWidth =
-    Math.floor((Field.width - 22) / Field._cell) * Field._cell - Field._cell;
-  static calcBottomMargin = Field.height - Field.calcFieldHeight - 21;
-  static calcRightMargin = Field.height - Field.calcFieldHeight - 21;
+    Math.floor((Field.width - Field._cell * 2) / Field._cell) * Field._cell -
+    Field._cell;
 
-  interval = 0;
+  intervalSnake = 0;
 
   state = {
     positionStack: {},
     vector: '',
     stateRestart: false,
+    gamePaused: false,
     foodStack: {}
   };
 
   static randomizer = () => {
     const randomX =
       Math.floor(
-        (Math.floor(
-          Math.random() * (Field.width - 23 + Field.calcRightMargin)
-        ) +
-          23) /
-          Field._cell
+        Math.floor(Math.random() * Field.calcFieldWidth) / Field._cell
       ) * Field._cell;
+
     const randomY =
       Math.floor(
-        (Math.floor(
-          Math.random() * (Field.height - 23 + Field.calcBottomMargin)
-        ) +
-          23) /
-          Field._cell
+        Math.floor(Math.random() * Field.calcFieldHeight) / Field._cell
       ) * Field._cell;
     return { x: randomX, y: randomY };
   };
@@ -59,37 +53,29 @@ class Field extends React.Component {
 
   componentDidMount = () => {
     this.initSnake();
+    this.foodPos();
     window.addEventListener('keydown', this.handleInput, true);
-    this.calcFieldArr();
   };
 
   setStateRestart = stateRestart => {
-    this.setState({ stateRestart: stateRestart });
+    this.setState({
+      stateRestart: stateRestart,
+      foodStack: {}
+    });
     this.initSnake();
+    this.foodPos();
   };
+
   getRestart = () => {
     if (this.state.stateRestart)
       return <Restart setStateRestart={this.setStateRestart} />;
     return null;
   };
 
-  calcFieldArr = () => {
-    const arrFiealdCellCount =
-      (Field.calcFieldHeight / Field._cell) *
-      (Field.calcFieldWidth / Field._cell);
-    const arrFiealdCell = [];
-    for (let i = 0; i < arrFiealdCellCount; i++) {
-      arrFiealdCell[i] = null;
-    }
-    // console.log(arrFiealdCell);
-    // console.log(Field.calcFieldHeight / Field._cell);
-    // console.log(Field.calcFieldWidth / Field._cell);
-  };
-
   initSnake = () => {
     this.setState({
       positionStack: Field.startPosition(Field._cell, Field.countSnake),
-      vector: 'ArrowUp'
+      vector: ''
     });
     const dirCode = Math.floor(Math.random() * (5 - 1)) + 1;
     if (dirCode === 1) {
@@ -105,17 +91,48 @@ class Field extends React.Component {
       this.setState({ vector: 'ArrowRight' });
     }
 
-    this.interval = setInterval(this.move, 1000);
-    this.foodPos();
+    this.intervalSnake = setInterval(this.move, 1000);
   };
 
   foodPos = () => {
     const foodStack = {};
     for (let i = 0; i < 20; i++) {
-      foodStack[i] = Field.randomizer();
+      (function(i) {
+        setTimeout(function() {
+          foodStack[i] = Field.randomizer();
+        }, 1000 * i);
+      })(i);
+    }
+    if (foodStack) {
       this.setState({ foodStack: foodStack });
     }
   };
+
+  foonOnSnake = foodStack => {
+    let keysSnake = Object.keys(this.state.positionStack);
+    keysSnake.forEach(key => {
+      if (
+        foodStack.x !== this.state.positionStack[key].x &&
+        foodStack.y !== this.state.positionStack[key].y
+      );
+    });
+  };
+
+  // snakeGrow = (position, foodPosition) => {
+  //   let keysFood = Object.keys(foodPosition);
+  //   keysFood.forEach(key => {
+  //     if (
+  //       position.x === foodPosition[key].x &&
+  //       position.y === foodPosition[key].y
+  //     ) {
+  //       console.log(this.state.foodStack);
+  //       delete foodPosition[key];
+  //       this.setState({ foodStack: foodPosition });
+  //       console.log(this.state.foodStack);
+  //       // Field.countSnake += 1;
+  //     }
+  //   });
+  // };
 
   selfCollision = (position, snakePosition) => {
     let keysSnake = Object.keys(snakePosition);
@@ -129,28 +146,39 @@ class Field extends React.Component {
   };
 
   borderCollision = position => {
-    const topBorder = Field.height - 10 - Field._cell * 2;
-    const bottomBorder = 10;
-    const leftBorder = 10 + Field._cell;
-    const rightBorder = Field.width - 10 - Field._cell;
+    const topBorder = -Field._cell;
+    const bottomBorder = Field.calcFieldHeight;
+    const leftBorder = -Field._cell;
+    const rightBorder = Field.calcFieldWidth;
     if (
       position.x <= leftBorder ||
       position.x >= rightBorder ||
-      position.y >= topBorder ||
-      position.y <= bottomBorder
+      position.y <= topBorder ||
+      position.y >= bottomBorder
     )
       this.gameOver();
   };
+  gamePaused = () => {
+    if (this.state.gamePaused) {
+      this.setState({ gamePaused: false });
+      this.intervalSnake = setInterval(this.move, 1000);
+    } else if (this.state.gamePaused === false) {
+      this.setState({ gamePaused: true });
+      clearInterval(this.intervalSnake);
+    }
+  };
 
   gameOver = () => {
-    clearInterval(this.interval);
+    clearInterval(this.intervalSnake);
     this.setState({ stateRestart: true });
   };
 
   changePosition = position => {
     const positionStack = { ...this.state.positionStack };
+    // const foodStack = { ...this.state.foodStack };
 
     if (this.selfCollision(position, positionStack));
+    // if (this.snakeGrow(position, foodStack));
     if (!this.borderCollision(position))
       for (let i = Field.countSnake - 1; i >= 1; i--) {
         const current = positionStack[i];
@@ -170,6 +198,7 @@ class Field extends React.Component {
     if (e.key === 'ArrowDown' && this.state.vector === 'ArrowUp') return;
     if (e.key === 'ArrowLeft' && this.state.vector === 'ArrowRight') return;
     if (e.key === 'ArrowRight' && this.state.vector === 'ArrowLeft') return;
+    if (e.key === ' ') return this.gamePaused();
     this.setState({ vector: e.key });
   };
 
@@ -195,12 +224,13 @@ class Field extends React.Component {
       <div
         className='wrapper'
         style={{
-          marginBottom: Field.calcBottomMargin,
-          marginRight: Field.calcRightMargin,
           width: Field.calcFieldWidth,
           height: Field.calcFieldHeight
         }}
-      ></div>
+      >
+        <div>{this.renderFood()}</div>
+        <div>{this.renderBoxes()}</div>
+      </div>
     );
   };
 
@@ -222,8 +252,6 @@ class Field extends React.Component {
     return (
       <div>
         {this.renderField()}
-        <div>{this.renderFood()}</div>
-        <div>{this.renderBoxes()}</div>
         {this.getRestart()}
       </div>
     );

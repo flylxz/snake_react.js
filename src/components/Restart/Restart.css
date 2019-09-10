@@ -4,8 +4,8 @@
   justify-content: space-evenly;
   align-items: center;
   position: absolute;
-  height: 20vmin;
-  width: 32vmin;
+  height: 100px;
+  width: 150px;
   border: 2px solid #000;
   background-color: red;
 }
