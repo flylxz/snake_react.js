@@ -3,6 +3,7 @@ import './Food.css';
 
 class Food extends React.Component {
   render() {
+    // console.log(this.props);
     let foodPosX = this.props.foodPos.x;
     let foodPosY = this.props.foodPos.y;
     let top = foodPosY + 'px';

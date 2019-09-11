@@ -10,7 +10,6 @@ class Box extends React.Component {
     let boxSize = this.props.boxSize - 4;
     // console.log(this.props);
 
-
     return (
       <div
         className='box'

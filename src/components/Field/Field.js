@@ -6,7 +6,7 @@ import Restart from '../Restart/Restart';
 
 class Field extends React.Component {
   static _cell = 15;
-  static countSnake = 2;
+  static countSnake = 20;
   static height = window.innerHeight;
   static width = window.innerWidth;
   static calcFieldHeight =
@@ -17,6 +17,8 @@ class Field extends React.Component {
     Field._cell;
 
   intervalSnake = 0;
+  intervalFood = 0;
+  intervalRemoveFood = 0;
 
   state = {
     positionStack: {},
@@ -51,9 +53,39 @@ class Field extends React.Component {
     return snake;
   };
 
+  static generateFood = () => {
+    let foodPosition = Field.randomizer();
+    let timestamp = Date.now();
+    let foodUnit = {};
+    foodUnit.id = timestamp;
+    foodUnit.position = foodPosition;
+    return foodUnit;
+  };
+
+  foodQueue = () => {
+    let newFood = Field.generateFood();
+    if (this.foonOnSnake(newFood)) return null;
+    if (this.foonOnFood(newFood)) return null;
+    let prevFood = this.state.foodStack;
+    let foodStack = Object.assign({}, newFood, prevFood);
+    foodStack[newFood.id] = newFood;
+    delete foodStack.id;
+    delete foodStack.position;
+    this.setState({ foodStack: foodStack });
+
+    // console.log(newFood);
+    // console.log(prevFood);
+    // console.log(foodStack);
+    // console.log(this.state.foodStack);
+  };
+
+  // foodRemove = food => {
+  //   let foods = { ...this.state.foodStack };
+  //   delete foods[food.id];
+  // };
+
   componentDidMount = () => {
     this.initSnake();
-    this.foodPos();
     window.addEventListener('keydown', this.handleInput, true);
   };
 
@@ -63,7 +95,6 @@ class Field extends React.Component {
       foodStack: {}
     });
     this.initSnake();
-    this.foodPos();
   };
 
   getRestart = () => {
@@ -92,20 +123,8 @@ class Field extends React.Component {
     }
 
     this.intervalSnake = setInterval(this.move, 1000);
-  };
-
-  foodPos = () => {
-    const foodStack = {};
-    for (let i = 0; i < 20; i++) {
-      (function(i) {
-        setTimeout(function() {
-          foodStack[i] = Field.randomizer();
-        }, 1000 * i);
-      })(i);
-    }
-    if (foodStack) {
-      this.setState({ foodStack: foodStack });
-    }
+    this.intervalFood = setInterval(this.foodQueue, 1000);
+    // this.intervalRemoveFood = setInterval(this.foodRemove, 5000);
   };
 
   foonOnSnake = foodStack => {
@@ -114,6 +133,15 @@ class Field extends React.Component {
       if (
         foodStack.x !== this.state.positionStack[key].x &&
         foodStack.y !== this.state.positionStack[key].y
+      );
+    });
+  };
+  foonOnFood = foodStack => {
+    let keysFood = Object.keys(this.state.foodStack);
+    keysFood.forEach(key => {
+      if (
+        foodStack.x !== this.state.foodStack[key].x &&
+        foodStack.y !== this.state.foodStack[key].y
       );
     });
   };
@@ -162,14 +190,17 @@ class Field extends React.Component {
     if (this.state.gamePaused) {
       this.setState({ gamePaused: false });
       this.intervalSnake = setInterval(this.move, 1000);
-    } else if (this.state.gamePaused === false) {
+      this.intervalFood = setInterval(this.foodQueue, 1000);
+    } else {
       this.setState({ gamePaused: true });
       clearInterval(this.intervalSnake);
+      clearInterval(this.intervalFood);
     }
   };
 
   gameOver = () => {
     clearInterval(this.intervalSnake);
+    clearInterval(this.intervalFood);
     this.setState({ stateRestart: true });
   };
 
@@ -236,6 +267,7 @@ class Field extends React.Component {
 
   renderBoxes = () => {
     const boxes = this.state.positionStack;
+    // console.log(boxes);
     return Object.keys(boxes).map(id => {
       return <Box key={id} movingBox={boxes[id]} boxSize={Field._cell} />;
     });
@@ -243,8 +275,11 @@ class Field extends React.Component {
 
   renderFood = () => {
     const food = this.state.foodStack;
+    // console.log(food);
     return Object.keys(food).map(id => {
-      return <Food key={id} foodPos={food[id]} foodSize={Field._cell} />;
+      return (
+        <Food key={id} foodPos={food[id].position} foodSize={Field._cell} />
+      );
     });
   };
 
