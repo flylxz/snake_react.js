@@ -2,10 +2,25 @@ import React from 'react';
 import './Food.css';
 
 class Food extends React.Component {
+  timeoutDestroy = 0;
+  componentDidMount = () => {
+    this.timeoutDestroy = setTimeout(
+      this.destroy,
+      this.props.timeDestroy * 1000
+    );
+  };
+
+  componentWillUnmount = () => {
+    clearTimeout(this.timeoutDestroy);
+  };
+
+  destroy = () => {
+    this.props.destroy(this.props.food.id);
+  };
+
   render() {
-    // console.log(this.props);
-    let foodPosX = this.props.foodPos.x;
-    let foodPosY = this.props.foodPos.y;
+    let foodPosX = this.props.food.position.x;
+    let foodPosY = this.props.food.position.y;
     let top = foodPosY + 'px';
     let left = foodPosX + 'px';
     let foodSize = this.props.foodSize - 4;
@@ -14,8 +29,8 @@ class Food extends React.Component {
       <div
         className='food'
         style={{
-          top: top,
           left: left,
+          top: top,
           height: foodSize,
           width: foodSize
         }}

@@ -6,7 +6,7 @@ import Restart from '../Restart/Restart';
 
 class Field extends React.Component {
   static _cell = 15;
-  static countSnake = 20;
+  static countSnake = 2;
   static height = window.innerHeight;
   static width = window.innerWidth;
   static calcFieldHeight =
@@ -18,7 +18,7 @@ class Field extends React.Component {
 
   intervalSnake = 0;
   intervalFood = 0;
-  intervalRemoveFood = 0;
+  intervalFoodRemove = 0;
 
   state = {
     positionStack: {},
@@ -54,35 +54,26 @@ class Field extends React.Component {
   };
 
   static generateFood = () => {
-    let foodPosition = Field.randomizer();
     let timestamp = Date.now();
     let foodUnit = {};
     foodUnit.id = timestamp;
-    foodUnit.position = foodPosition;
+    foodUnit.position = Field.randomizer();
     return foodUnit;
   };
 
   foodQueue = () => {
     let newFood = Field.generateFood();
-    if (this.foonOnSnake(newFood)) return null;
-    if (this.foonOnFood(newFood)) return null;
     let prevFood = this.state.foodStack;
-    let foodStack = Object.assign({}, newFood, prevFood);
+    if (this.foodOnSnake(newFood, this.state.positionStack)) {
+      newFood = Field.generateFood();
+    }
+    if (this.foodOnFood(newFood, prevFood)) {
+      newFood = Field.generateFood();
+    }
+    let foodStack = Object.assign({}, prevFood);
     foodStack[newFood.id] = newFood;
-    delete foodStack.id;
-    delete foodStack.position;
     this.setState({ foodStack: foodStack });
-
-    // console.log(newFood);
-    // console.log(prevFood);
-    // console.log(foodStack);
-    // console.log(this.state.foodStack);
   };
-
-  // foodRemove = food => {
-  //   let foods = { ...this.state.foodStack };
-  //   delete foods[food.id];
-  // };
 
   componentDidMount = () => {
     this.initSnake();
@@ -124,43 +115,55 @@ class Field extends React.Component {
 
     this.intervalSnake = setInterval(this.move, 1000);
     this.intervalFood = setInterval(this.foodQueue, 1000);
-    // this.intervalRemoveFood = setInterval(this.foodRemove, 5000);
   };
 
-  foonOnSnake = foodStack => {
-    let keysSnake = Object.keys(this.state.positionStack);
-    keysSnake.forEach(key => {
-      if (
-        foodStack.x !== this.state.positionStack[key].x &&
-        foodStack.y !== this.state.positionStack[key].y
-      );
-    });
-  };
-  foonOnFood = foodStack => {
-    let keysFood = Object.keys(this.state.foodStack);
+  snakeFeed = (nextPosition, foodStack) => {
+    const keysFood = Object.keys(foodStack);
     keysFood.forEach(key => {
       if (
-        foodStack.x !== this.state.foodStack[key].x &&
-        foodStack.y !== this.state.foodStack[key].y
-      );
+        nextPosition.x === foodStack[key].position.x &&
+        nextPosition.y === foodStack[key].position.y
+      ) {
+        this.snakeGrow();
+        delete foodStack[key];
+        this.setState({ foodStack: foodStack });
+      }
     });
   };
 
-  // snakeGrow = (position, foodPosition) => {
-  //   let keysFood = Object.keys(foodPosition);
-  //   keysFood.forEach(key => {
-  //     if (
-  //       position.x === foodPosition[key].x &&
-  //       position.y === foodPosition[key].y
-  //     ) {
-  //       console.log(this.state.foodStack);
-  //       delete foodPosition[key];
-  //       this.setState({ foodStack: foodPosition });
-  //       console.log(this.state.foodStack);
-  //       // Field.countSnake += 1;
-  //     }
-  //   });
-  // };
+  snakeGrow = () => {
+    const positionStack = { ...this.state.positionStack };
+    console.log('1->', positionStack);
+    const countSnake = Object.keys(positionStack).length;
+    console.log(countSnake);
+    const end = positionStack[countSnake - 1];
+    positionStack[countSnake] = { x: end.x, y: end.y };
+    console.log('2->', positionStack);
+
+    this.setState({ positionStack: positionStack });
+  };
+
+  foodOnSnake = (newFood, snakePosition) => {
+    let keysSnake = Object.keys(snakePosition);
+    keysSnake.forEach(key => {
+      if (
+        newFood.position.x === snakePosition[key].x &&
+        newFood.position.y === snakePosition[key].y
+      )
+        return;
+    });
+  };
+
+  foodOnFood = (newFood, foodPosition) => {
+    let keysFood = Object.keys(foodPosition);
+    keysFood.forEach(key => {
+      if (
+        newFood.position.x === foodPosition[key].position.x &&
+        newFood.position.y === foodPosition[key].position.y
+      )
+        return;
+    });
+  };
 
   selfCollision = (position, snakePosition) => {
     let keysSnake = Object.keys(snakePosition);
@@ -186,6 +189,7 @@ class Field extends React.Component {
     )
       this.gameOver();
   };
+
   gamePaused = () => {
     if (this.state.gamePaused) {
       this.setState({ gamePaused: false });
@@ -205,22 +209,25 @@ class Field extends React.Component {
   };
 
   changePosition = position => {
+    const foodStack = { ...this.state.foodStack };
+    this.snakeFeed(position, foodStack);
     const positionStack = { ...this.state.positionStack };
-    // const foodStack = { ...this.state.foodStack };
 
     if (this.selfCollision(position, positionStack));
-    // if (this.snakeGrow(position, foodStack));
-    if (!this.borderCollision(position))
-      for (let i = Field.countSnake - 1; i >= 1; i--) {
-        const current = positionStack[i];
-        const prev = positionStack[i - 1];
-        current.x = prev.x;
-        current.y = prev.y;
-      }
+    if (!this.borderCollision(position)) console.log();
+
+    const countSnake = Object.keys(positionStack).length;
+
+    for (let i = countSnake - 1; i >= 1; i--) {
+      positionStack[i] = {};
+      const current = positionStack[i];
+      const prev = positionStack[i - 1];
+      current.x = prev.x;
+      current.y = prev.y;
+    }
 
     positionStack[0].x = position.x;
     positionStack[0].y = position.y;
-
     this.setState({ positionStack: positionStack });
   };
 
@@ -267,18 +274,28 @@ class Field extends React.Component {
 
   renderBoxes = () => {
     const boxes = this.state.positionStack;
-    // console.log(boxes);
     return Object.keys(boxes).map(id => {
       return <Box key={id} movingBox={boxes[id]} boxSize={Field._cell} />;
     });
   };
 
+  destroy = id => {
+    const foodStack = { ...this.state.foodStack };
+    delete foodStack[id];
+    this.setState({ foodStack: foodStack });
+  };
+
   renderFood = () => {
     const food = this.state.foodStack;
-    // console.log(food);
     return Object.keys(food).map(id => {
       return (
-        <Food key={id} foodPos={food[id].position} foodSize={Field._cell} />
+        <Food
+          key={id}
+          food={food[id]}
+          destroy={this.destroy}
+          timeDestroy={20}
+          foodSize={Field._cell}
+        />
       );
     });
   };

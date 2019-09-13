@@ -13,7 +13,7 @@ class Box extends React.Component {
     return (
       <div
         className='box'
-        style={{ top: top, left: left, height: boxSize, width: boxSize }}
+        style={{ left: left, top: top, height: boxSize, width: boxSize }}
       ></div>
     );
   }
