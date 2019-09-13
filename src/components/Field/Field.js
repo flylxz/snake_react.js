@@ -112,6 +112,9 @@ class Field extends React.Component {
   componentDidMount = () => {
     this.initSnake01();
     this.initSnake02();
+    this.intervalSnake01 = setInterval(this.move01, 1000);
+    this.intervalSnake02 = setInterval(this.move02, 1000);
+    this.intervalFood = setInterval(this.foodQueue, 1000);
     window.addEventListener('keydown', this.handleInput01, true);
     window.addEventListener('keydown', this.handleInput02, true);
   };
@@ -149,9 +152,6 @@ class Field extends React.Component {
     if (dirCode === 4) {
       this.setState({ vector01: 'ArrowRight' });
     }
-
-    this.intervalSnake01 = setInterval(this.move01, 1000);
-    this.intervalFood = setInterval(this.foodQueue, 1000);
   };
 
   initSnake02 = () => {
@@ -172,29 +172,50 @@ class Field extends React.Component {
     if (dirCode === 4) {
       this.setState({ vector02: 'ArrowRight' });
     }
-    this.intervalSnake02 = setInterval(this.move02, 1000);
   };
 
-  snakeFeed = (nextPosition, foodStack) => {
+  snakeFeed01 = (nextPosition, foodStack) => {
     const keysFood = Object.keys(foodStack);
     keysFood.forEach(key => {
       if (
         nextPosition.x === foodStack[key].position.x &&
         nextPosition.y === foodStack[key].position.y
       ) {
-        this.snakeGrow();
+        this.snakeGrow01();
         delete foodStack[key];
         this.setState({ foodStack: foodStack });
       }
     });
   };
 
-  snakeGrow = () => {
+  snakeFeed02 = (nextPosition, foodStack) => {
+    const keysFood = Object.keys(foodStack);
+    keysFood.forEach(key => {
+      if (
+        nextPosition.x === foodStack[key].position.x &&
+        nextPosition.y === foodStack[key].position.y
+      ) {
+        this.snakeGrow02();
+        delete foodStack[key];
+        this.setState({ foodStack: foodStack });
+      }
+    });
+  };
+
+  snakeGrow01 = () => {
     const positionStack = { ...this.state.positionStack01 };
     const countSnake = Object.keys(positionStack).length;
     const end = positionStack[countSnake - 1];
     positionStack[countSnake] = { x: end.x, y: end.y };
     this.setState({ positionStack01: positionStack });
+  };
+
+  snakeGrow02 = () => {
+    const positionStack = { ...this.state.positionStack02 };
+    const countSnake = Object.keys(positionStack).length;
+    const end = positionStack[countSnake - 1];
+    positionStack[countSnake] = { x: end.x, y: end.y };
+    this.setState({ positionStack02: positionStack });
   };
 
   foodOnSnake = (newFood, snakePosition) => {
@@ -220,6 +241,17 @@ class Field extends React.Component {
   };
 
   selfCollision = (position, snakePosition) => {
+    let keysSnake = Object.keys(snakePosition);
+    keysSnake.forEach(key => {
+      if (
+        position.x === snakePosition[key].x &&
+        position.y === snakePosition[key].y
+      )
+        this.gameOver();
+    });
+  };
+
+  withOtherCollision = (position, snakePosition) => {
     let keysSnake = Object.keys(snakePosition);
     keysSnake.forEach(key => {
       if (
@@ -265,27 +297,44 @@ class Field extends React.Component {
     this.setState({ stateRestart: true });
   };
 
-  changePosition = position => {
+  changePosition01 = position01 => {
     const foodStack = { ...this.state.foodStack };
-    this.snakeFeed(position, foodStack);
-    const positionStack = { ...this.state.positionStack01 };
+    this.snakeFeed01(position01, foodStack);
+    const positionStack01 = { ...this.state.positionStack01 };
+    if (this.withOtherCollision(position01, this.state.positionStack02));
+    if (this.selfCollision(position01, positionStack01));
+    if (!this.borderCollision(position01));
+    const countSnake01 = Object.keys(positionStack01).length;
+    for (let i = countSnake01 - 1; i >= 1; i--) {
+      positionStack01[i] = {};
+      const current01 = positionStack01[i];
+      const prev01 = positionStack01[i - 1];
+      current01.x = prev01.x;
+      current01.y = prev01.y;
+    }
+    positionStack01[0].x = position01.x;
+    positionStack01[0].y = position01.y;
+    this.setState({ positionStack01: positionStack01 });
+  };
 
-    if (this.selfCollision(position, positionStack));
-    if (!this.borderCollision(position)) console.log();
-
-    const countSnake = Object.keys(positionStack).length;
-
-    for (let i = countSnake - 1; i >= 1; i--) {
-      positionStack[i] = {};
-      const current = positionStack[i];
-      const prev = positionStack[i - 1];
+  changePosition02 = position02 => {
+    const foodStack = { ...this.state.foodStack };
+    this.snakeFeed02(position02, foodStack);
+    const positionStack02 = { ...this.state.positionStack02 };
+    if (this.withOtherCollision(position02, this.state.positionStack01));
+    if (this.selfCollision(position02, positionStack02));
+    if (!this.borderCollision(position02));
+    const countSnake02 = Object.keys(positionStack02).length;
+    for (let i = countSnake02 - 1; i >= 1; i--) {
+      positionStack02[i] = {};
+      const current = positionStack02[i];
+      const prev = positionStack02[i - 1];
       current.x = prev.x;
       current.y = prev.y;
     }
-
-    positionStack[0].x = position.x;
-    positionStack[0].y = position.y;
-    this.setState({ positionStack01: positionStack });
+    positionStack02[0].x = position02.x;
+    positionStack02[0].y = position02.y;
+    this.setState({ positionStack02: positionStack02 });
   };
 
   handleInput01 = e => {
@@ -302,40 +351,39 @@ class Field extends React.Component {
     if (e.key === 'ArrowDown' && this.state.vector02 === 'ArrowUp') return;
     if (e.key === 'ArrowLeft' && this.state.vector02 === 'ArrowRight') return;
     if (e.key === 'ArrowRight' && this.state.vector02 === 'ArrowLeft') return;
-    if (e.key === ' ') return this.gamePaused();
     this.setState({ vector02: e.key });
   };
 
   move01 = () => {
-    const head = this.state.positionStack01[0];
+    const head01 = this.state.positionStack01[0];
 
     if (this.state.vector01 === 'ArrowUp') {
-      this.changePosition({ x: head.x, y: head.y - Field._cell });
+      this.changePosition01({ x: head01.x, y: head01.y - Field._cell });
     }
     if (this.state.vector01 === 'ArrowDown') {
-      this.changePosition({ x: head.x, y: head.y + Field._cell });
+      this.changePosition01({ x: head01.x, y: head01.y + Field._cell });
     }
     if (this.state.vector01 === 'ArrowLeft') {
-      this.changePosition({ x: head.x - Field._cell, y: head.y });
+      this.changePosition01({ x: head01.x - Field._cell, y: head01.y });
     }
     if (this.state.vector01 === 'ArrowRight') {
-      this.changePosition({ x: head.x + Field._cell, y: head.y });
+      this.changePosition01({ x: head01.x + Field._cell, y: head01.y });
     }
   };
 
   move02 = () => {
-    const head = this.state.positionStack02[0];
+    const head02 = this.state.positionStack02[0];
     if (this.state.vector02 === 'w') {
-      this.changePosition({ x: head.x, y: head.y - Field._cell });
+      this.changePosition02({ x: head02.x, y: head02.y - Field._cell });
     }
     if (this.state.vector02 === 's') {
-      this.changePosition({ x: head.x, y: head.y + Field._cell });
+      this.changePosition02({ x: head02.x, y: head02.y + Field._cell });
     }
     if (this.state.vector02 === 'a') {
-      this.changePosition({ x: head.x - Field._cell, y: head.y });
+      this.changePosition02({ x: head02.x - Field._cell, y: head02.y });
     }
     if (this.state.vector02 === 'd') {
-      this.changePosition({ x: head.x + Field._cell, y: head.y });
+      this.changePosition02({ x: head02.x + Field._cell, y: head02.y });
     }
   };
 
@@ -363,10 +411,10 @@ class Field extends React.Component {
   };
 
   renderBoxes02 = () => {
-    // const boxes = this.state.positionStackSecond;
-    // return Object.keys(boxes).map(id => {
-    //   return <Box02 key={id} movingBox={boxes[id]} boxSize={Field._cell} />;
-    // });
+    const boxes = this.state.positionStack02;
+    return Object.keys(boxes).map(id => {
+      return <Box02 key={id} movingBox={boxes[id]} boxSize={Field._cell} />;
+    });
   };
 
   destroy = id => {
