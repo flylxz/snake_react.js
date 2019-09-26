@@ -39,8 +39,8 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 
 
 ## Control:
-### Green snake: Arrow Keys
-### Yellow snake: WASD 
+Green snake: Arrow Keys
+Yellow snake: WASD 
 
 
 ## Play the game https://snake-game-f17f1.web.app/
