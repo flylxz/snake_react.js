@@ -4,15 +4,16 @@
   justify-content: space-evenly;
   align-items: center;
   position: absolute;
-  font-size: 3vw;
-  height: 25vh;
-  width: 30vw;
+  font-size: 4vmin;
+  height: 20vmin;
+  width: 32vmin;
   border: 2px solid #000;
   background-color: red;
 }
 .button-restart {
   border: 2px solid #000;
-  padding: 2vmin;
+  font-size: 3vmin;
+  padding: 1vmin;
   background-color: #0f0;
   cursor: pointer;
 }
