@@ -1,5 +1,7 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Play the game https://snake-game-f17f1.web.app/
+
 ## Available Scripts
 
 In the project directory, you can run:
@@ -43,4 +45,3 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 <p>Yellow snake: WASD</p> 
 
 
-## Play the game https://snake-game-f17f1.web.app/
