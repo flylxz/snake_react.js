@@ -1,7 +1,7 @@
 import React from 'react';
-import './Box.css';
+import './Box01.css';
 
-class Box extends React.Component {
+class Box01 extends React.Component {
   render() {
     let setPositionY = this.props.movingBox.y;
     let setPositionX = this.props.movingBox.x;
@@ -18,4 +18,4 @@ class Box extends React.Component {
   }
 }
 
-export default Box;
+export default Box01;

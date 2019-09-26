@@ -17,4 +17,5 @@ class Restart extends React.Component {
     );
   }
 }
+
 export default Restart;

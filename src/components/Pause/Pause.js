@@ -3,11 +3,7 @@ import './Pause.css';
 
 class Pause extends React.Component {
   render() {
-    return (
-      <div>
-        <div className='pause'>PAUSE</div>
-      </div>
-    );
+    return <div className='pause'>PAUSE</div>;
   }
 }
 
