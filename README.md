@@ -1,6 +1,6 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Play the game https://snake-game-f17f1.web.app/
+## Play the game https://flylxz.github.io
 
 ## Available Scripts
 
