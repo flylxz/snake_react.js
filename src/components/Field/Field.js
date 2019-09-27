@@ -5,6 +5,7 @@ import Box02 from '../Box02/Box02';
 import Food from '../Food/Food';
 import Restart from '../Restart/Restart';
 import Pause from '../Pause/Pause';
+import Splash from '../Splash/Splash';
 
 class Field extends React.Component {
   static _cell = 15;
@@ -27,6 +28,7 @@ class Field extends React.Component {
     positionStack02: {},
     vector01: '',
     vector02: '',
+    stateStart: true,
     stateRestart: false,
     gamePaused: false,
     foodStack: {}
@@ -117,11 +119,23 @@ class Field extends React.Component {
   };
 
   componentDidMount = () => {
-    this.initSnake01();
-    this.initSnake02();
-
+    this.getStart();
     window.addEventListener('keydown', this.handleInput01, true);
     window.addEventListener('keydown', this.handleInput02, true);
+  };
+
+  setStateStart = stateStart => {
+    this.setState({ stateStart: stateStart });
+    this.initSnake01();
+    this.initSnake02();
+  };
+
+  getStart = () => {
+    if (this.state.stateStart) {
+      return <Splash setStateStart={this.setStateStart} />;
+    } else {
+      return null;
+    }
   };
 
   setStateRestart = stateRestart => {
@@ -479,6 +493,7 @@ class Field extends React.Component {
       <div>
         {this.renderField()}
         {this.getRestart()}
+        {this.getStart()}
       </div>
     );
   }

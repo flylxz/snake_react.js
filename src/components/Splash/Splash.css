@@ -1,0 +1,62 @@
+.splash {
+  position: absolute;
+  border: 2px solid #000;
+  background-color: rgb(74, 201, 42);
+  height: 40vmin;
+  width: 64vmin;
+  display: flex;
+  flex-direction: column;
+  /* grid-template-rows: 2; */
+  /* justify-content: center; */
+  justify-content: space-around;
+  align-items: center;
+}
+
+.control {
+  display: grid;
+  /* grid-template-rows: repeat(4, 1fr); */
+  grid-template-columns: repeat(5, 1fr);
+  grid-gap: 1rem;
+  justify-items: center;
+}
+
+.orange-snake {
+  height: 11px;
+  width: 11px;
+  border: 2px solid #000;
+  background-color: rgb(255, 123, 0);
+}
+
+.orange-snake:first-child {
+  background-color: blue;
+}
+
+.orange-snake:last-child {
+  background-color: red;
+}
+
+.green-snake {
+  height: 11px;
+  width: 11px;
+  border: 2px solid #000;
+  background-color: green;
+}
+
+.green-snake:first-child {
+  background-color: blue;
+}
+
+.green-snake:last-child {
+  background-color: red;
+}
+
+.start {
+  border: 2px solid #000;
+  font-size: 3vmin;
+  padding: 1vmin;
+  background-color: #0f0;
+  cursor: pointer;
+  height: 4vmin;
+  width: 10vmin;
+  text-align: center;
+}
